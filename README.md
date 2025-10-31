@@ -2,6 +2,8 @@
 
 This repository contains production-ready Terraform infrastructure code for the DukQa platform, implementing a secure, scalable, and compliant cloud architecture on AWS.
 
+<!-- Pipeline trigger: Testing GitHub Actions OIDC authentication -->
+
 ## 🏗️ Architecture Overview
 
 The DukQa platform uses a modern cloud-native architecture with:
