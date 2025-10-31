@@ -1,0 +1,53 @@
+name: 🏗️ Terraform Infrastructure Deploy - dukqa-platform
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '**/*.tf'
+      - '**/*.tfvars'
+      - 'README.md'
+      - '.github/workflows/terraform-plan-apply.yaml'
+
+jobs:
+  terraform:
+    name: 🌍 Provision Infrastructure with Terraform
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: 🧰 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::746387399274:role/GitHubActionsEKSAdmin
+          aws-region: eu-west-1
+
+      - name: 🪄 Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.4
+
+      - name: 📂 Initialize Terraform
+        run: terraform init -backend-config="key=dukqa-platform/terraform.tfstate"
+
+      - name: 🧪 Validate Terraform Configuration
+        run: terraform validate
+
+      - name: 🗺️ Terraform Plan (Preview)
+        run: terraform plan -var-file="environments/prod.tfvars"
+
+      - name: 🚀 Terraform Apply (Deploy)
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve -var-file="environments/prod.tfvars"
+
+      - name: ✅ Post-Apply Summary
+        if: success()
+        run: |
+          echo "✅ Terraform infrastructure applied successfully!"
+          echo "Cluster: dukqa-platform"
+          echo "Region: eu-west-1"
